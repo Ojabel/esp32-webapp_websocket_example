@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aircraft Instruments</title>
+</head>
+<body>
+  <h2>Aircraft Instrument Readings:</h2>
+  <div id="instruments-container">Waiting for data...</div>
+
+  <script>
+    // Replace ESP32_IP_ADDRESS with the actual IP address printed in the ESP32 serial monitor.
+    let ws = new WebSocket("ws://192.168.43.131:81/");
+
+    ws.onopen = () => {
+      console.log("Connected to WebSocket Server");
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        let instruments = JSON.parse(event.data);
+        let content = "<ul>";
+        instruments.forEach(instr => {
+          content += `<li>
+                        ID: ${instr.id} | 
+                        Altitude: ${instr.altitude} ft | 
+                        Airspeed: ${instr.airspeed} kt | 
+                        Heading: ${instr.heading}&deg; | 
+                        Pitch: ${instr.pitch}&deg; | 
+                        Roll: ${instr.roll}&deg;
+                      </li>`;
+        });
+        content += "</ul>";
+        document.getElementById("instruments-container").innerHTML = content;
+      } catch (e) {
+        console.error("Error parsing JSON: ", e);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log("Disconnected from WebSocket Server");
+    };
+  </script>
+</body>
+</html>
